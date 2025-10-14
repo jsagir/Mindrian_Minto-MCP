@@ -1,151 +1,139 @@
 """
-Evidence Execution with Domain-Aware Search Routing
+Evidence Execution with Domain-Aware Search
+Each evidence piece must support a specific MECE reason
 """
 
-from typing import List, Dict, Optional
+from typing import Dict, List
 import asyncio
 from .plan import REASONING_STATE
 from .domain_detector import generate_search_queries
 
 
-async def search_web_evidence(query: str, max_results: int = 5) -> List[Dict]:
+async def search_web_evidence_async(query: str, search_type: str, max_results: int = 5) -> List[Dict]:
     """
-    Placeholder for Tavily search integration.
-    Replace with actual Tavily API calls.
+    Execute web search for evidence.
+    
+    TODO: Integrate with actual Tavily API
+    For now, returns mock evidence structure
     """
-    # TODO: Integrate with Tavily search
-    # For now, return mock results
+    # Mock evidence for demonstration
     return [
         {
-            "content": f"Mock evidence for query: {query}",
-            "url": f"https://example.com/{query.replace(' ', '-')}",
-            "confidence": 0.95
+            "content": f"Evidence supporting: {query}",
+            "url": f"https://example.com/{query.replace(' ', '-')[:50]}",
+            "source": "Research Paper" if search_type == "academic" else "Industry Report",
+            "confidence": 0.85,
+            "relevance": 0.90,
+            "recency": "2024-10-01"
         }
+        for _ in range(min(max_results, 3))
     ]
 
 
-async def search_evidence_domain_aware(query: str, search_type: str, 
-                                      domain: str, max_results: int = 5) -> List[Dict]:
+def execute_evidence_gathering(run_id: str, stage: str = "all") -> Dict:
     """
-    Route search to appropriate sources based on domain.
+    Execute evidence gathering for pyramid analysis.
     
-    NEW: Domain-aware search routing
-    """
-    # Generate domain-specific queries
-    enhanced_queries = []
+    Each piece of evidence must:
+    1. Support a specific MECE reason
+    2. Help answer the question that reason raises
+    3. Be relevant to the domain
+    4. Have credibility and recency
     
-    if search_type == "academic":
-        # For technical/scientific questions, prioritize academic sources
-        enhanced_queries = [
-            f"{query} site:arxiv.org OR site:ieee.org OR site:sciencedirect.com",
-            f"{query} research paper",
-            f"{query} journal article"
-        ]
+    Args:
+        run_id: The pyramid identifier
+        stage: "all" or specific reason ("reason_1", "reason_2", etc.)
     
-    elif search_type == "business":
-        # For business questions, use existing approach
-        enhanced_queries = [
-            f"{query} market analysis",
-            f"{query} industry report",
-            query
-        ]
-    
-    elif search_type == "medical":
-        # For medical questions, prioritize medical sources
-        enhanced_queries = [
-            f"{query} site:pubmed.ncbi.nlm.nih.gov OR site:nejm.org",
-            f"{query} clinical study",
-            query
-        ]
-    
-    else:
-        enhanced_queries = [query]
-    
-    # Execute searches
-    all_results = []
-    for enhanced_query in enhanced_queries[:2]:  # Use top 2 queries
-        results = await search_web_evidence(enhanced_query, max_results=3)
-        all_results.extend(results)
-        if len(all_results) >= max_results:
-            break
-    
-    return all_results[:max_results]
-
-
-async def run_plan_stage_async(run_id: str, stage: str = "all") -> Dict:
-    """
-    Execute evidence gathering with domain-aware routing.
-    
-    UPDATED: Uses domain-aware search strategy
+    Returns:
+        Evidence organized by reason with quality metrics
     """
     plan = REASONING_STATE.get(run_id)
     if not plan:
         return {"error": "Run not found"}
     
-    search_strategy = plan.get("search_strategy", "general")
-    domain = plan.get("domain", "general")
-    
-    # Collect evidence for specified stage(s)
+    # Get evidence tasks
     if stage == "all":
         tasks = plan["evidence_tasks"]
     else:
         tasks = [t for t in plan["evidence_tasks"] if t["reason_id"] == stage]
     
-    evidence_collected = {}
+    print(f"\n🔍 Gathering Evidence:")
+    print(f"  Tasks: {len(tasks)}")
+    print(f"  Stage: {stage}")
     
-    # Execute searches
-    search_tasks = []
-    for task in tasks:
-        reason_id = task["reason_id"]
-        query = task["query"]
-        search_type = task.get("search_type", search_strategy)
-        
-        # Create async search task
-        search_tasks.append(
-            search_evidence_domain_aware(query, search_type, domain)
-        )
-    
-    # Execute all searches in parallel
-    results = await asyncio.gather(*search_tasks)
-    
-    # Organize by reason
-    for i, task in enumerate(tasks):
-        reason_id = task["reason_id"]
-        if reason_id not in evidence_collected:
-            evidence_collected[reason_id] = []
-        evidence_collected[reason_id].extend(results[i])
+    # Execute searches (async)
+    evidence_collected = asyncio.run(gather_all_evidence(tasks, plan))
     
     # Calculate metrics
     evidence_summary = []
+    total_evidence = 0
+    
     for reason in plan["reasons"]:
         reason_id = reason["id"]
         evidence = evidence_collected.get(reason_id, [])
-        avg_confidence = sum(e.get("confidence", 0) for e in evidence) / max(len(evidence), 1)
+        
+        if evidence:
+            avg_confidence = sum(e.get("confidence", 0) for e in evidence) / len(evidence)
+            avg_relevance = sum(e.get("relevance", 0) for e in evidence) / len(evidence)
+        else:
+            avg_confidence = 0
+            avg_relevance = 0
         
         evidence_summary.append({
             "reason_id": reason_id,
             "reason_title": reason["title"],
             "evidence_count": len(evidence),
-            "avg_confidence": avg_confidence
+            "avg_confidence": avg_confidence,
+            "avg_relevance": avg_relevance,
+            "sources": [e.get("source") for e in evidence]
         })
+        
+        total_evidence += len(evidence)
     
-    # Store evidence in state
+    # Store in plan
     plan["evidence_collected"] = evidence_collected
     plan["status"] = "evidence_collected"
+    plan["evidence_summary"] = evidence_summary
+    
+    print(f"\n✅ Evidence Collected:")
+    print(f"  Total: {total_evidence} items")
+    print(f"  Per Reason: {total_evidence / max(len(plan['reasons']), 1):.1f} avg")
     
     return {
         "run_id": run_id,
         "stage": stage,
         "status": "evidence_collected",
-        "evidence_collected": evidence_summary,
-        "total_evidence": sum(len(e) for e in evidence_collected.values()),
+        "evidence_by_reason": evidence_summary,
+        "total_evidence": total_evidence,
         "next_step": "synthesize_pyramid"
     }
 
 
-def run_plan_stage(run_id: str, stage: str = "all") -> Dict:
-    """Synchronous wrapper for async execution."""
-    return asyncio.run(run_plan_stage_async(run_id, stage))
+async def gather_all_evidence(tasks: List[Dict], plan: Dict) -> Dict[str, List[Dict]]:
+    """
+    Gather evidence for all tasks in parallel.
+    """
+    domain = plan.get("domain", "general")
+    
+    # Create async tasks
+    async_tasks = []
+    for task in tasks:
+        query = task["query"]
+        search_type = task.get("search_type", "general")
+        async_tasks.append(search_web_evidence_async(query, search_type))
+    
+    # Execute in parallel
+    results = await asyncio.gather(*async_tasks)
+    
+    # Organize by reason
+    evidence_by_reason = {}
+    for i, task in enumerate(tasks):
+        reason_id = task["reason_id"]
+        if reason_id not in evidence_by_reason:
+            evidence_by_reason[reason_id] = []
+        evidence_by_reason[reason_id].extend(results[i])
+    
+    return evidence_by_reason
 
 
-__all__ = ['run_plan_stage', 'search_evidence_domain_aware']
+__all__ = ['execute_evidence_gathering']
