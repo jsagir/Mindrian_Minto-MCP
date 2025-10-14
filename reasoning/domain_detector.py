@@ -499,6 +499,19 @@ def generate_domain_specific_queries(brief: str, domain: DomainType,
     return queries
 
 
+# BACKWARD COMPATIBILITY ALIAS - FIX FOR IMPORT ERROR
+# This allows old code using generate_search_queries to work
+def generate_search_queries(brief: str, domain: DomainType = None, 
+                           subdomain: Optional[TechnicalSubdomain] = None) -> List[str]:
+    """
+    Backward compatibility wrapper for generate_domain_specific_queries.
+    """
+    if domain is None:
+        domain, context = detect_domain(brief)
+        subdomain = context.get('subdomain')
+    return generate_domain_specific_queries(brief, domain, subdomain)
+
+
 # Export main functions
 __all__ = [
     'DomainType',
@@ -510,5 +523,6 @@ __all__ = [
     'get_search_domains',
     'is_academic_source',
     'is_business_source',
-    'generate_domain_specific_queries'
+    'generate_domain_specific_queries',
+    'generate_search_queries'  # Added for backward compatibility
 ]
