@@ -1,0 +1,63 @@
+[project]
+name = "minto-pyramid-mcp"
+version = "1.0.0"
+description = "Minto's Pyramid Logic MCP Server - Transform complex thoughts into structured pyramids"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = [
+    "mcp",
+    "sequential-thinking",
+    "minto-pyramid",
+    "scqa",
+    "mece",
+    "fastmcp"
+]
+
+dependencies = [
+    "fastmcp>=2.10.0",
+    "httpx>=0.25.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# ============================================================================
+# FastMCP Configuration
+# ============================================================================
+
+[tool.fastmcp]
+name = "Minto Pyramid Logic MCP"
+version = "1.0.0"
+description = "Advanced sequential reasoning with Minto's Pyramid Principle"
+
+[tool.fastmcp.server]
+transport = "http"
+host = "0.0.0.0"
+port = 8000
+streaming = true
+session_management = true
+
+[tool.fastmcp.auth]
+enabled = false  # Set to true for OAuth in production
+type = "oauth"
+
+[tool.fastmcp.features]
+semantic_cache = true
+cache_ttl = 7200
+rate_limiting = true
+rate_limit_per_minute = 60
+rate_limit_per_hour = 2000
+
+[tool.fastmcp.cloud]
+auto_deploy = true
+branch_deployments = true
+pr_previews = true
+health_check_path = "/health"
+metrics_enabled = true
