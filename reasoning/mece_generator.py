@@ -1,106 +1,163 @@
-"""MECE category generation with domain-specific templates."""
+"""
+Expert MECE Category Generation
+Universal templates for any domain detected
+"""
 
-from typing import List, Dict
-from .domain_detector import detect_domain, classify_technical_problem
+from typing import List, Dict, Optional
+from .domain_detector import (
+    DomainType, AnalysisLens, detect_domain
+)
 
 
-# Domain-specific MECE templates
+# Universal MECE templates
 MECE_TEMPLATES = {
-    "technical": {
-        "algorithm": [
-            "Problem Formulation & Requirements",
-            "Solution Approach & Methods",
-            "Implementation Strategy",
-            "Validation & Performance Metrics"
-        ],
-        "optimization": [
-            "Objective Functions & Goals",
+    DomainType.TECHNICAL_ENGINEERING: {
+        'optimization': [
+            "Problem Formulation & Objective Functions",
             "Constraint Handling Mechanisms",
             "Search & Convergence Methods",
             "Solution Quality & Validation"
         ],
-        "system_design": [
+        'system_design': [
             "System Architecture & Components",
             "Data Flow & Processing Pipeline",
             "Scalability & Performance",
             "Reliability & Error Handling"
         ],
-        "implementation": [
-            "Technology Stack Selection",
-            "Development Approach & Methodology",
-            "Integration & Dependencies",
-            "Testing & Deployment Strategy"
+        'algorithm': [
+            "Problem Definition & Requirements",
+            "Algorithm Design & Complexity",
+            "Implementation Techniques",
+            "Performance Evaluation"
         ],
-        "architecture": [
-            "Structural Components",
-            "Interface Definitions",
-            "Communication Patterns",
-            "Quality Attributes"
+        'default': [
+            "Technical Requirements & Constraints",
+            "Solution Approach & Methods",
+            "Implementation Strategy",
+            "Validation & Performance Metrics"
         ]
     },
-    "business": {
-        "growth": [
-            "Market Position Analysis",
-            "Operational Efficiency",
-            "Revenue Model Evolution",
-            "Strategic Positioning"
-        ],
-        "profitability": [
-            "Revenue Drivers",
-            "Cost Structure",
-            "Pricing Strategy",
-            "Market Dynamics"
-        ],
-        "strategy": [
-            "Competitive Landscape",
-            "Core Capabilities",
-            "Growth Opportunities",
-            "Risk Mitigation"
+    
+    DomainType.NATURAL_SCIENCES: {
+        'default': [
+            "Theoretical Framework & Foundations",
+            "Experimental Methods & Design",
+            "Data Analysis & Interpretation",
+            "Implications & Future Directions"
         ]
     },
-    "medical": {
-        "diagnosis": [
-            "Clinical Presentation",
-            "Diagnostic Workup",
-            "Differential Considerations",
-            "Treatment Planning"
+    
+    DomainType.MEDICAL_HEALTH: {
+        'default': [
+            "Clinical Presentation & Assessment",
+            "Diagnostic Workup & Testing",
+            "Treatment Options & Protocols",
+            "Prognosis & Outcomes"
         ]
     },
-    "general": [
-        "Current State Analysis",
-        "Key Challenges",
-        "Potential Solutions",
-        "Implementation Considerations"
-    ]
+    
+    DomainType.BUSINESS_ECONOMICS: {
+        'strategy': [
+            "Market Position & Competitive Landscape",
+            "Operational Efficiency & Capabilities",
+            "Revenue Model & Financial Structure",
+            "Strategic Positioning & Growth"
+        ],
+        'operations': [
+            "Process Design & Workflow",
+            "Resource Allocation & Optimization",
+            "Quality & Performance Management",
+            "Technology & Automation"
+        ],
+        'default': [
+            "Market Analysis & Trends",
+            "Financial Performance & Drivers",
+            "Operational Considerations",
+            "Strategic Implications"
+        ]
+    },
+    
+    DomainType.MATHEMATICS: {
+        'default': [
+            "Mathematical Foundations & Definitions",
+            "Theoretical Analysis & Proofs",
+            "Computational Methods",
+            "Applications & Examples"
+        ]
+    },
+    
+    DomainType.SOCIAL_POLICY: {
+        'default': [
+            "Stakeholder Analysis & Impact",
+            "Policy Framework & Mechanisms",
+            "Implementation Considerations",
+            "Outcomes & Evaluation"
+        ]
+    },
+    
+    DomainType.LAW_GOVERNANCE: {
+        'default': [
+            "Legal Framework & Precedent",
+            "Regulatory Requirements",
+            "Compliance Mechanisms",
+            "Implications & Risks"
+        ]
+    },
+    
+    DomainType.ARTS_HUMANITIES: {
+        'default': [
+            "Historical Context & Background",
+            "Critical Analysis & Interpretation",
+            "Cultural Significance",
+            "Contemporary Relevance"
+        ]
+    },
+    
+    DomainType.INTERDISCIPLINARY: {
+        'default': [
+            "Disciplinary Foundations",
+            "Integration Points & Synergies",
+            "Cross-Domain Methods",
+            "Emergent Capabilities"
+        ]
+    },
+    
+    DomainType.GENERAL: {
+        'default': [
+            "Current State & Context",
+            "Key Challenges & Constraints",
+            "Potential Solutions & Approaches",
+            "Implementation Considerations"
+        ]
+    }
 }
 
 
-def generate_mece_reasons(brief: str) -> List[Dict[str, str]]:
+def generate_mece_reasons(brief: str, domain: DomainType = None, 
+                         context: Dict = None) -> List[Dict[str, any]]:
     """
     Generate domain-appropriate MECE categories.
-    
-    Returns list of reason dictionaries with id, title, and claim.
+    Automatically detects domain if not provided.
     """
-    domain = detect_domain(brief)
+    # Detect domain if not provided
+    if domain is None or context is None:
+        domain, context = detect_domain(brief)
     
-    if domain == "technical":
-        problem_type = classify_technical_problem(brief)
-        categories = MECE_TEMPLATES["technical"].get(problem_type, 
-                                                     MECE_TEMPLATES["technical"]["algorithm"])
-    elif domain == "business":
-        # Detect business problem type (growth, profitability, strategy)
-        if any(word in brief.lower() for word in ['revenue', 'profit', 'margin']):
-            categories = MECE_TEMPLATES["business"]["profitability"]
-        elif any(word in brief.lower() for word in ['strategy', 'competitive', 'positioning']):
-            categories = MECE_TEMPLATES["business"]["strategy"]
-        else:
-            categories = MECE_TEMPLATES["business"]["growth"]
-    elif domain in MECE_TEMPLATES:
-        # Get first template for domain
-        templates = MECE_TEMPLATES[domain]
-        categories = list(templates.values())[0]
+    # Get subdomain
+    subdomain = context.get('subdomain')
+    
+    # Select appropriate template
+    domain_templates = MECE_TEMPLATES.get(domain, MECE_TEMPLATES[DomainType.GENERAL])
+    
+    # For technical domain, use subdomain if available
+    if domain == DomainType.TECHNICAL_ENGINEERING and subdomain:
+        categories = domain_templates.get(subdomain, domain_templates['default'])
     else:
-        categories = MECE_TEMPLATES["general"]
+        # Get default template for domain
+        if isinstance(domain_templates, dict):
+            categories = domain_templates.get('default', list(domain_templates.values())[0])
+        else:
+            categories = domain_templates
     
     # Convert to reason format
     reasons = []
@@ -115,17 +172,27 @@ def generate_mece_reasons(brief: str) -> List[Dict[str, str]]:
     return reasons
 
 
-def get_search_strategy(domain: str) -> str:
+def get_search_strategy(domain: DomainType) -> str:
     """
     Determine search strategy based on domain.
-    
-    Returns: 'academic', 'business', 'medical', 'general'
     """
     strategy_map = {
-        'technical': 'academic',
-        'business': 'business',
-        'medical': 'medical',
-        'legal': 'legal',
-        'general': 'general'
+        DomainType.TECHNICAL_ENGINEERING: 'academic',
+        DomainType.NATURAL_SCIENCES: 'academic',
+        DomainType.MEDICAL_HEALTH: 'medical',
+        DomainType.BUSINESS_ECONOMICS: 'business',
+        DomainType.MATHEMATICS: 'academic',
+        DomainType.SOCIAL_POLICY: 'general',
+        DomainType.LAW_GOVERNANCE: 'legal',
+        DomainType.ARTS_HUMANITIES: 'academic',
+        DomainType.INTERDISCIPLINARY: 'academic',
+        DomainType.GENERAL: 'general'
     }
     return strategy_map.get(domain, 'general')
+
+
+__all__ = [
+    'generate_mece_reasons',
+    'get_search_strategy',
+    'MECE_TEMPLATES'
+]
