@@ -1,0 +1,17 @@
+{
+  "brief": "Our SaaS company grew revenue 60% last quarter but profit margin dropped from 28% to 14%. Customer acquisition cost tripled while customer lifetime value remained flat. Need strategic analysis of this paradox and identification of hidden opportunities.",
+  "audience": "board_of_directors",
+  "constraints": {
+    "timeframe": "Q1 2025",
+    "geography": "global",
+    "competitive_context": "high_growth_saas_market",
+    "max_recommendations": 5
+  },
+  "expected_outputs": [
+    "SCQA analysis",
+    "MECE breakdown of contributing factors",
+    "Evidence-based insights with citations",
+    "Opportunity identification",
+    "Strategic recommendations"
+  ]
+}
