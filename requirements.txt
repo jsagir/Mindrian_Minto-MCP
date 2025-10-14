@@ -1,29 +1,21 @@
-# FastMCP Minto Pyramid Server v3.0 - Reasoning Orchestrator
-# Python 3.11+ required
+# FastMCP for MCP server
+fastmcp>=0.3.0
 
-# Core FastMCP Framework
-fastmcp>=2.10.0
+# Async support
+asyncio
 
-# HTTP Client for Tavily
-httpx>=0.25.0
+# Type hints
+typing-extensions>=4.0.0
 
-# Data validation and models
-pydantic>=2.0.0
+# Optional: If integrating actual Tavily search
+# tavily-python>=0.3.0
 
-# Environment variables
-python-dotenv>=1.0.0
+# Optional: If using real Neo4j
+# neo4j>=5.0.0
 
-# Async utilities
-asyncio-throttle>=1.0.0
-
-# JSON handling (fast)
-orjson>=3.9.0
-
-# Date utilities
-python-dateutil>=2.8.0
-
-# UUID generation (built-in, but explicit)
-# uuid - standard library
-
-# Dataclasses support (Python 3.7+)
-# dataclasses - standard library for Python 3.7+
+# Standard library (included in Python)
+# - uuid
+# - datetime
+# - re
+# - enum
+# - dataclasses
