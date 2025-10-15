@@ -1,217 +1,307 @@
-# 🏛️ Minto Pyramid Logic MCP Server v3.1
+# Minto Pyramid Sequential Thinking MCP Server
 
-Implements Barbara Minto's **Pyramid Principle** with Sequential Thinking for structured reasoning and analysis.
+A production-ready MCP server that performs complete Minto pyramid analysis using sequential thinking, evidence gathering, and structured outputs.
 
-## 📚 What is the Pyramid Principle?
+## 🎯 Features
 
-The Pyramid Principle is a communication and reasoning methodology developed by Barbara Minto at McKinsey. It structures thinking in a top-down, hierarchical manner that mirrors how the mind naturally processes information.
+- **6-Phase Analysis Pipeline**: Initialization → SCQA → MECE → Evidence → Synthesis → Meta-Analysis
+- **Iterative MECE Generation**: Automatic framework refinement with revision capability
+- **Evidence Integration**: Web search with citation management
+- **Structured Outputs**: Pydantic models for type-safe results
+- **Complete Transparency**: Every thinking step documented
+- **Flexible Usage**: Individual tools or complete pipeline
 
-### Core Structure: SCQA
+## 🚀 Quick Start
 
-**S**ituation → **C**omplication → **Q**uestion → **A**nswer
-
-1. **Situation**: Establish context the reader knows
-2. **Complication**: What changed or went wrong
-3. **Question**: What question does this raise in the reader's mind?
-4. **Answer**: The governing thought (main message)
-
-### Three Sacred Rules
-
-1. **Ideas at any level must ALWAYS be summaries of ideas grouped below**
-2. **Ideas in each grouping must ALWAYS be the SAME KIND of idea**
-3. **Ideas in each grouping must ALWAYS be LOGICALLY ORDERED**
-
-### MECE Principle
-
-**M**utually **E**xclusive, **C**ollectively **E**xhaustive
-- **No overlaps** between categories (avoid double-counting)
-- **No gaps** in coverage (avoid missing information)
-
-### Cognitive Load Principle
-
-Limit to **3-4 categories** (mind holds 7±2 items, 3 is ideal)
-
----
-
-## 🚀 Features
-
-✅ **Universal Domain Detection** - Works for ANY domain (technical, business, medical, etc.)  
-✅ **SCQA Introduction** - Engages reader before diving into analysis  
-✅ **MECE Validation** - Ensures no overlaps, no gaps  
-✅ **Sequential Thinking** - Smart reasoning for structure generation  
-✅ **Vertical Q&A Flow** - Each level answers question from above  
-✅ **Horizontal Logic** - Deductive OR inductive (never mixed)  
-✅ **4 Logical Orders** - Deductive/Chronological/Structural/Comparative  
-✅ **Quality Critique** - 8-point validation checklist  
-
----
-
-## 📦 Installation
+### Installation
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/Mindrian_Minto-MCP.git
-cd Mindrian_Minto-MCP
+git clone <repository-url>
+cd minto-pyramid-mcp
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Run server
-python server.py
+# Or install with FastMCP
+fastmcp install .
 ```
 
----
+### Basic Usage
 
-## 🎯 Usage Example
-
-### 1. Plan Pyramid (SCQA + MECE)
+#### Option 1: Complete Analysis (One Call)
 ```python
-result = plan_pyramid(
-    brief="How can we develop density-based topology optimization "
-          "algorithms for photonic inverse design that enforce "
-          "foundry fabrication constraints?",
-    audience="researchers"
-)
+from fastmcp import Client
 
-# Returns:
-# {
-#   "run_id": "abc123",
-#   "domain": "technical_engineering",
-#   "subdomain": "photonics",
-#   "scqa": {
-#     "situation": "...",
-#     "complication": "...",
-#     "question": "...",
-#     "answer": "..."
-#   },
-#   "reasons": [
-#     {"title": "Device Design & Geometry", ...},
-#     {"title": "Fabrication Constraints & Foundry Rules", ...},
-#     {"title": "Performance Optimization & Validation", ...}
-#   ],
-#   "mece_validation": {"is_mece": true, ...}
-# }
+async with Client("minto-pyramid-mcp") as client:
+    result = await client.call_tool(
+        "run_complete_minto_analysis",
+        {
+            "input_text": """
+            Your problem description here...
+            Include context, constraints, and current situation.
+            """,
+            "analysis_goal": "Reveal hidden opportunities",
+            "include_meta_analysis": True
+        }
+    )
+    
+    print(result["final_pyramid"])
 ```
 
-### 2. Validate MECE
+#### Option 2: Phase-by-Phase Control
 ```python
-validation = validate_mece(run_id="abc123")
+# Phase 1: Initialize
+init = await client.call_tool("initialize_minto_analysis", {
+    "input_text": "Your problem...",
+    "analysis_goal": "Find opportunities"
+})
 
-# Returns:
-# {
-#   "is_mece": true,
-#   "mutually_exclusive": true,
-#   "collectively_exhaustive": true,
-#   "cognitive_load_ok": true,
-#   "category_count": 3
-# }
+session_id = init["session_id"]
+
+# Phase 2: Develop SCQA
+scqa = await client.call_tool("develop_scqa_framework", {
+    "session_id": session_id
+})
+
+# Phase 3: Generate MECE
+mece = await client.call_tool("generate_mece_framework", {
+    "session_id": session_id,
+    "max_iterations": 3
+})
+
+# Phase 4: Gather Evidence
+evidence = await client.call_tool("gather_evidence", {
+    "session_id": session_id,
+    "max_results_per_query": 10
+})
+
+# Phase 5: Synthesize
+synthesis = await client.call_tool("synthesize_pyramid", {
+    "session_id": session_id,
+    "output_format": "all"
+})
+
+# Phase 6: Meta-Analysis
+meta = await client.call_tool("perform_meta_analysis", {
+    "session_id": session_id
+})
 ```
 
-### 3. Gather Evidence
+## 🛠️ Available Tools
+
+### 1. `initialize_minto_analysis`
+**Purpose:** Start a new analysis session  
+**Returns:** Session ID and analysis plan
+
+### 2. `develop_scqa_framework`
+**Purpose:** Create Situation-Complication-Question-Answer framework  
+**Returns:** Complete SCQA with thinking steps
+
+### 3. `generate_mece_framework`
+**Purpose:** Generate MECE categories with iterative refinement  
+**Returns:** Validated MECE framework with revision history
+
+### 4. `gather_evidence`
+**Purpose:** Collect evidence for each MECE category  
+**Returns:** Evidence points with citations
+
+### 5. `synthesize_pyramid`
+**Purpose:** Combine all components into complete pyramid  
+**Returns:** Final Minto pyramid analysis
+
+### 6. `perform_meta_analysis`
+**Purpose:** Analyze the analysis process itself  
+**Returns:** Process insights and patterns
+
+### 7. `run_complete_minto_analysis`
+**Purpose:** Execute all phases in sequence  
+**Returns:** Complete analysis with all outputs
+
+## 📊 Output Structure
 ```python
-evidence = run_plan_stage(run_id="abc123", stage="all")
-
-# Returns:
-# {
-#   "total_evidence": 12,
-#   "evidence_by_reason": [
-#     {"reason_title": "Device Design", "evidence_count": 4},
-#     ...
-#   ]
-# }
+{
+    "scqa": {
+        "situation": {
+            "content": "...",
+            "strategic_importance": "...",
+            "confidence": "High"
+        },
+        "complication": {
+            "paradox": "...",
+            "impossible_choice": "...",
+            "structural_nature": "...",
+            "confidence": "High"
+        },
+        "question": {
+            "opportunity_focused": "...",
+            "scope": "...",
+            "constraints": [...],
+            "confidence": "Critical"
+        },
+        "no_answer_commitment": "..."
+    },
+    "mece": {
+        "categories": [
+            {
+                "name": "Category 1",
+                "core_insight": "...",
+                "opportunity_statement": "...",
+                "evidence_hypotheses": [...],
+                "confidence": "High"
+            },
+            // ... more categories
+        ],
+        "framework_type": "mechanism_based",
+        "iteration_number": 3,
+        "validation": {
+            "mutually_exclusive": true,
+            "collectively_exhaustive": true,
+            "same_abstraction_level": true,
+            "validation_passed": true
+        }
+    },
+    "opportunity_spaces": [
+        {
+            "category": {...},
+            "evidence": [
+                {
+                    "name": "...",
+                    "source": "...",
+                    "url": "...",
+                    "key_finding": "...",
+                    "confidence": "High",
+                    "relevance_score": 0.95
+                }
+            ],
+            "synthesis": "...",
+            "strategic_implication": "..."
+        }
+    ],
+    "meta_analysis": {
+        "process_summary": {...},
+        "tool_orchestration": {...},
+        "revision_analysis": {...},
+        "lessons_learned": [...]
+    }
+}
 ```
 
-### 4. Synthesize Deliverable
+## 🎓 Methodology
+
+This server implements the **6-phase pattern** discovered through meta-analysis:
+
+1. **Initialization**: Plan strategy, identify requirements
+2. **SCQA Development**: Build conceptual structure (Situation, Complication, Question, NO ANSWER)
+3. **MECE Generation**: Create mutually exclusive, collectively exhaustive categories (with revision)
+4. **Evidence Gathering**: Validate framework with factual evidence
+5. **Synthesis**: Create polished deliverable with opportunity spaces
+6. **Meta-Analysis**: Reflect and extract process insights
+
+### Key Principles
+
+- **Bottom-Up Construction**: Evidence → Categories → Framework → Summary
+- **Revision Capability**: Iterate until quality threshold met
+- **Context Isolation**: Fresh context for unbiased MECE generation
+- **Evidence-First**: Every claim validated with sources
+- **Complete Transparency**: Every decision documented
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create `.env` file:
+```bash
+# Optional: If using external search APIs
+TAVILY_API_KEY=your_api_key_here
+ANTHROPIC_API_KEY=your_api_key_here
+
+# Server configuration
+MCP_SERVER_NAME=minto-pyramid-analyzer
+MCP_LOG_LEVEL=INFO
+```
+
+### Claude Desktop Integration
+
+Add to `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "minto-pyramid": {
+      "command": "python",
+      "args": ["path/to/server.py"],
+      "env": {}
+    }
+  }
+}
+```
+
+## 📈 Performance
+
+- **Typical Analysis Time**: 30-60 seconds (depending on evidence gathering)
+- **Memory Usage**: ~100MB per session
+- **Concurrent Sessions**: Unlimited (session-based state management)
+- **Thinking Steps**: 25-30 per complete analysis
+
+## 🧪 Testing
+```bash
+# Run tests
+python -m pytest tests/
+
+# Test individual tool
+fastmcp test server.py:mcp --tool initialize_minto_analysis
+```
+
+## 📚 Examples
+
+### Example 1: Photonic Inverse Design
 ```python
-deliverable = synthesize_pyramid(run_id="abc123", format="markdown")
-
-# Returns full pyramid structure:
-# - SCQA Introduction
-# - Governing Thought
-# - 3-4 MECE Reasons
-# - Supporting Evidence
-# - Citations
+result = await client.call_tool("run_complete_minto_analysis", {
+    "input_text": """
+    Photonic inverse design faces a fundamental trilemma:
+    - Density-based methods have accurate gradients but violate fabrication constraints
+    - Always-feasible methods respect constraints but struggle with convergence
+    - No known technique achieves both simultaneously
+    
+    Foundries require: 100-150nm minimum features, strict geometric rules.
+    """,
+    "analysis_goal": "Reveal algorithmic innovation opportunities"
+})
 ```
 
-### 5. Quality Critique
+**Result:** 4 MECE opportunity spaces (Representation, Gradient, Constraint, Search) with evidence from 2024-2025 literature.
+
+### Example 2: Business Strategy
 ```python
-critique = critique_pyramid(run_id="abc123")
-
-# Returns:
-# {
-#   "overall_score": 0.89,
-#   "passed": true,
-#   "critiques": [
-#     {"aspect": "SCQA Completeness", "score": 0.95, ...},
-#     {"aspect": "MECE Compliance", "score": 1.0, ...},
-#     ...
-#   ]
-# }
+result = await client.call_tool("run_complete_minto_analysis", {
+    "input_text": """
+    Our company faces declining market share despite strong product quality.
+    Competitors are using aggressive pricing strategies.
+    Customer feedback is positive but purchase rates are falling.
+    """,
+    "analysis_goal": "Identify strategic response opportunities"
+})
 ```
-
----
-
-## 📊 Domain Support
-
-Works automatically for:
-
-| Domain | Example Questions |
-|--------|------------------|
-| **Technical/Engineering** | Algorithm optimization, system design, photonics, quantum computing, ML/AI |
-| **Natural Sciences** | Physics experiments, chemistry synthesis, biological research |
-| **Business/Economics** | Strategy, operations, finance, marketing |
-| **Medical/Health** | Clinical diagnosis, pharmaceutical development, treatment protocols |
-| **Mathematics** | Proof development, computational methods, theoretical analysis |
-| **Social/Policy** | Policy analysis, social impact, governance |
-| **Law/Governance** | Legal frameworks, compliance, regulatory analysis |
-| **Arts/Humanities** | Historical analysis, literary critique, cultural studies |
-
----
-
-## 🏗️ Architecture
-```
-server.py                    # FastMCP server (main entry point)
-reasoning/
-  ├── __init__.py           # Package initialization
-  ├── domain_detector.py    # Universal domain detection
-  ├── mece_generator.py     # MECE category generation
-  ├── mece_validator.py     # MECE compliance validation
-  ├── plan.py               # Pyramid planning with sequential thinking
-  ├── execution.py          # Evidence gathering
-  ├── synthesis.py          # Deliverable generation
-  └── critique.py           # Quality validation (8 checkpoints)
-```
-
----
-
-## 🎓 Learning Resources
-
-- **Original Book**: ["The Pyramid Principle" by Barbara Minto](https://www.barbaraminto.com/)
-- **MECE Framework**: [McKinsey Problem Solving](https://www.mckinsey.com/)
-- **Cognitive Load**: [Miller's Law (7±2)](https://en.wikipedia.org/wiki/The_Magical_Number_Seven,_Plus_or_Minus_Two)
-
----
 
 ## 🤝 Contributing
 
 Contributions welcome! Please:
-1. Follow Minto principles in code structure
-2. Add tests for new features
-3. Update documentation
-
----
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Submit a pull request
 
 ## 📄 License
 
-MIT License - See LICENSE file
-
----
+MIT License - see LICENSE file for details
 
 ## 🙏 Acknowledgments
 
-- **Barbara Minto** - For the Pyramid Principle methodology
-- **McKinsey & Company** - For MECE framework
-- **FastMCP** - For MCP server framework
+- Built with [FastMCP](https://github.com/jlowin/fastmcp)
+- Inspired by Barbara Minto's "The Pyramid Principle"
+- Sequential thinking pattern from Claude's analysis tools
 
----
+## 📞 Support
 
-**Built with ❤️ following Barbara Minto's timeless principles**
+- Issues: [GitHub Issues](https://github.com/yourusername/minto-pyramid-mcp/issues)
+- Documentation: [Full Docs](https://docs.example.com)
+- Email: support@example.com
