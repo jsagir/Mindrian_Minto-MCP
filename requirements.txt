@@ -1,21 +1,23 @@
-# FastMCP for MCP server
-fastmcp>=0.3.0
+# FastMCP Framework
+fastmcp>=2.10.0
+
+# HTTP Client for external APIs
+httpx>=0.25.0
+
+# Data validation and serialization
+pydantic>=2.0.0
+
+# Environment variable management
+python-dotenv>=1.0.0
 
 # Async support
-asyncio
+asyncio>=3.4.3
 
-# Type hints
-typing-extensions>=4.0.0
+# JSON handling
+orjson>=3.9.0
 
-# Optional: If integrating actual Tavily search
-# tavily-python>=0.3.0
+# Datetime utilities
+python-dateutil>=2.8.0
 
-# Optional: If using real Neo4j
-# neo4j>=5.0.0
-
-# Standard library (included in Python)
-# - uuid
-# - datetime
-# - re
-# - enum
-# - dataclasses
+# Optional: Enhanced search capabilities
+# tavily-python>=0.3.0  # Uncomment if using Tavily API directly
